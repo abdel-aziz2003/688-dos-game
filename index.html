@@ -134,16 +134,18 @@
                 loading.innerHTML = '📁 Loading game files...';
                 
                 // Load the game files
-                const gameBundle = await fetch('./game.jsdos');
-                if (!gameBundle.ok) {
-                    // Fallback: try to create bundle from files
-                    loading.innerHTML = '⚙️ Preparing game bundle...';
-                    const bundle = await createGameBundle();
-                    dosbox = await ci.run(bundle);
-                } else {
-                    const arrayBuffer = await gameBundle.arrayBuffer();
-                    dosbox = await ci.run(new Uint8Array(arrayBuffer));
-                }
+                loading.innerHTML = '🎮 Starting 688 Attack Sub...';
+                
+                // Try direct file loading approach
+                const bundle = await createGameBundle();
+                dosbox = await ci.run(bundle);
+                
+                // Auto-run the game
+                setTimeout(() => {
+                    if (dosbox) {
+                        dosbox.shell("GAME.EXE");
+                    }
+                }, 2000);
                 
                 loading.style.display = 'none';
                 canvas.style.display = 'block';
@@ -156,25 +158,45 @@
         }
 
         async function createGameBundle() {
-            // This is a simplified version - you might need to adjust based on your file structure
-            const gameFiles = [
-                'GAME.EXE',
-                // Add other game files here as needed
-            ];
-            
-            const bundle = {};
-            for (const file of gameFiles) {
-                try {
-                    const response = await fetch(`./game/${file}`);
-                    if (response.ok) {
-                        bundle[file] = new Uint8Array(await response.arrayBuffer());
+            try {
+                loading.innerHTML = '📁 Loading GAME.EXE...';
+                
+                // Create a simple DOS environment and load the main executable
+                const dosConfig = {
+                    'GAME.EXE': await loadFile('./game/GAME.EXE'),
+                };
+                
+                // Try to load other common files
+                const commonFiles = [
+                    'INSTALL.EXE', 'SETUP.EXE', 'CONFIG.SYS', 'AUTOEXEC.BAT',
+                    'GAME.DAT', 'GAME.CFG', 'SOUND.CFG'
+                ];
+                
+                for (const file of commonFiles) {
+                    try {
+                        const data = await loadFile(`./game/${file}`);
+                        if (data) dosConfig[file] = data;
+                    } catch (e) {
+                        // File doesn't exist, continue
                     }
-                } catch (e) {
-                    console.warn(`Could not load ${file}`);
                 }
+                
+                return dosConfig;
+            } catch (error) {
+                console.error('Bundle creation failed:', error);
+                throw error;
             }
-            
-            return bundle;
+        }
+        
+        async function loadFile(url) {
+            const response = await fetch(url, { 
+                mode: 'cors',
+                cache: 'no-cache'
+            });
+            if (!response.ok) {
+                throw new Error(`Failed to load ${url}: ${response.status}`);
+            }
+            return new Uint8Array(await response.arrayBuffer());
         }
 
         function toggleFullscreen() {
