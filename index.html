@@ -1,1 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>688 Attack Sub - Play Online</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #00d4aa;
+            margin-bottom: 10px;
+        }
+        
+        .game-container {
+            background: #16213e;
+            border: 2px solid #00d4aa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 0 20px rgba(0, 212, 170, 0.3);
+        }
+        
+        #dosbox {
+            width: 100%;
+            max-width: 800px;
+            height: 600px;
+            border: none;
+            background: black;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: #0f172a;
+            border-radius: 8px;
+        }
+        
+        button {
+            background: #00d4aa;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #00b894;
+            transform: translateY(-2px);
+        }
+        
+        .instructions {
+            text-align: left;
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .loading {
+            color: #00d4aa;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚢 688 Attack Sub</h1>
+        <p>Classic submarine warfare simulation - Play online!</p>
+        
+        <div class="game-container">
+            <div id="loading" class="loading">
+                🔄 Loading DOS emulator... Please wait
+            </div>
+            <canvas id="dosbox" style="display: none;"></canvas>
+        </div>
+        
+        <div class="controls">
+            <button onclick="startGame()">🚀 Start Game</button>
+            <button onclick="toggleFullscreen()">🖥️ Fullscreen</button>
+            <button onclick="toggleSound()">🔊 Sound On/Off</button>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 Instructions:</h3>
+            <ul>
+                <li><strong>Click "Start Game"</strong> to begin 688 Attack Sub</li>
+                <li><strong>Use arrow keys</strong> for navigation</li>
+                <li><strong>F1-F12 keys</strong> for various submarine functions</li>
+                <li><strong>Alt+Enter</strong> for fullscreen mode</li>
+                <li><strong>Ctrl+F9</strong> to exit the game</li>
+            </ul>
+            <p><strong>About the Game:</strong> 688 Attack Sub is a classic submarine simulation game where you command a nuclear submarine in various combat scenarios. Use sonar, torpedoes, and tactical skills to complete missions.</p>
+        </div>
+    </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-dos/6.22.59/js-dos.min.js"></script>
+    <script>
+        let dosbox = null;
+        let gameStarted = false;
+        let soundEnabled = true;
+
+        async function startGame() {
+            if (gameStarted) return;
+            
+            const canvas = document.getElementById('dosbox');
+            const loading = document.getElementById('loading');
+            
+            try {
+                loading.innerHTML = '🔄 Initializing DOS environment...';
+                
+                // Initialize js-dos
+                const ci = await Dos(canvas, {
+                    wdosboxUrl: "https://cdnjs.cloudflare.com/ajax/libs/js-dos/6.22.59/wdosbox.js",
+                });
+                
+                loading.innerHTML = '📁 Loading game files...';
+                
+                // Load the game files
+                const gameBundle = await fetch('./game.jsdos');
+                if (!gameBundle.ok) {
+                    // Fallback: try to create bundle from files
+                    loading.innerHTML = '⚙️ Preparing game bundle...';
+                    const bundle = await createGameBundle();
+                    dosbox = await ci.run(bundle);
+                } else {
+                    const arrayBuffer = await gameBundle.arrayBuffer();
+                    dosbox = await ci.run(new Uint8Array(arrayBuffer));
+                }
+                
+                loading.style.display = 'none';
+                canvas.style.display = 'block';
+                gameStarted = true;
+                
+            } catch (error) {
+                console.error('Error starting game:', error);
+                loading.innerHTML = '❌ Error loading game. Make sure all game files are uploaded to the /game folder.';
+            }
+        }
+
+        async function createGameBundle() {
+            // This is a simplified version - you might need to adjust based on your file structure
+            const gameFiles = [
+                'GAME.EXE',
+                // Add other game files here as needed
+            ];
+            
+            const bundle = {};
+            for (const file of gameFiles) {
+                try {
+                    const response = await fetch(`./game/${file}`);
+                    if (response.ok) {
+                        bundle[file] = new Uint8Array(await response.arrayBuffer());
+                    }
+                } catch (e) {
+                    console.warn(`Could not load ${file}`);
+                }
+            }
+            
+            return bundle;
+        }
+
+        function toggleFullscreen() {
+            const canvas = document.getElementById('dosbox');
+            if (canvas.requestFullscreen) {
+                canvas.requestFullscreen();
+            } else if (canvas.webkitRequestFullscreen) {
+                canvas.webkitRequestFullscreen();
+            } else if (canvas.mozRequestFullScreen) {
+                canvas.mozRequestFullScreen();
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            if (dosbox) {
+                // Toggle sound in dosbox if possible
+                console.log('Sound toggled:', soundEnabled);
+            }
+        }
+
+        // Auto-start on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loading').innerHTML = '🎮 Ready to play! Click "Start Game" button above.';
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
