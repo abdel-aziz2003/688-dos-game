@@ -12,40 +12,655 @@
             margin: 0;
             padding: 20px;
             text-align: center;
+            min-height: 100vh;
         }
         
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
         }
         
         h1 {
             color: #00d4aa;
             margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 0 0 10px rgba(0, 212, 170, 0.5);
         }
         
-        iframe {
-            width: 100%;
-            height: 600px;
-            border: none;
+        .game-container {
+            background: rgba(22, 33, 62, 0.9);
+            border: 2px solid #00d4aa;
+            border-radius: 15px;
+            padding: 20px;
             margin: 20px 0;
-            background: black;
+            box-shadow: 0 0 20px rgba(0, 212, 170, 0.3);
+        }
+        
+        #dosbox {
+            width: 100%;
+            max-width: 800px;
+            height: 600px;
+            background: #000;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 8px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #00d4aa, #00b894);
+            color: #1a1a2e;
+            border: none;
+            padding: 12px 24px;
+            margin: 8px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #00b894, #00a085);
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .upload-area {
+            border: 2px dashed #00d4aa;
+            border-radius: 10px;
+            padding: 40px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            background: rgba(0, 212, 170, 0.1);
+        }
+        
+        .upload-area.dragover {
+            background: rgba(0, 212, 170, 0.2);
+            border-color: #00b894;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .file-list {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+            display: none;
+        }
+        
+        .loading {
+            color: #00d4aa;
+            font-size: 18px;
+            margin: 20px 0;
+            padding: 40px;
+        }
+        
+        .instructions {
+            text-align: left;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .alternative {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid #ff6b6b;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>688 Attack Sub</h1>
+        <h1>🚢 688 Attack Sub</h1>
         <p>Classic submarine warfare simulation</p>
         
-        <!-- Embedded version from Archive.org -->
-        <iframe src="https://archive.org/embed/688AttackSub" 
-                webkitallowfullscreen="true" 
-                mozallowfullscreen="true" 
-                allowfullscreen>
-        </iframe>
+        <div class="game-container">
+            <div id="loading" class="loading">
+                🎮 Upload your DOS game files to get started
+            </div>
+            <canvas id="dosbox"></canvas>
+        </div>
         
-        <p>If the game doesn't load, <a href="https://archive.org/details/688AttackSub" target="_blank">play it directly on Archive.org</a></p>
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <h3>📁 Upload Game Files</h3>
+            <p>Click here to select your 688 Attack Sub files</p>
+            <p><small>Select ALL files from your game folder (GAME.EXE, .DAT, .CFG, etc.)</small></p>
+            <input type="file" id="fileInput" multiple>
+        </div>
+        
+        <div id="fileList" class="file-list">
+            <h4>📋 Uploaded Files:</h4>
+            <ul id="uploadedFiles"></ul>
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn" onclick="startGame()" disabled>🚀 Start Game</button>
+            <button onclick="downloadForDOSBox()">💾 Download DOSBox Setup</button>
+            <button onclick="restartPage()">🔄 Reset</button>
+        </div>
+        
+        <div class="alternative">
+            <h3>⚠️ Having Trouble?</h3>
+            <p><strong>Alternative Method:</strong> If the web emulator doesn't work, you can:</p>
+            <ol>
+                <li>Download <a href="https://www.dosbox.com/" target="_blank" style="color: #00d4aa;">DOSBox</a> on your computer</li>
+                <li>Click "Download DOSBox Setup" above to get instructions</li>
+                <li>Run your game locally with better compatibility</li>
+            </ol>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 Instructions:</h3>
+            <ol>
+                <li><strong>Upload Files:</strong> Select ALL files from your 688 Attack Sub folder</li>
+                <li><strong>Start Game:</strong> Click the start button once files are uploaded</li>
+                <li><strong>Controls:</strong> Use keyboard (arrow keys, function keys, Enter, Esc)</li>
+            </ol>
+            
+            <h4>🎯 About 688 Attack Sub:</h4>
+            <p>A realistic submarine simulation where you command a nuclear attack submarine. Navigate using sonar, fire torpedoes, and complete naval missions in this classic 1989 strategy game.</p>
+        </div>
     </div>
+
+    <script>
+        let gameFiles = {};
+        let dosboxReady = false;
+
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.querySelector('.upload-area');
+        const fileList = document.getElementById('fileList');
+        const uploadedFiles = document.getElementById('uploadedFiles');
+        const startBtn = document.getElementById('startBtn');
+        const loading = document.getElementById('loading');
+
+        // File upload handling
+        fileInput.addEventListener('change', handleFiles);
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles({ target: { files: e.dataTransfer.files } });
+        });
+
+        async function handleFiles(event) {
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+
+            loading.innerHTML = '📁 Processing files...';
+            uploadedFiles.innerHTML = '';
+            gameFiles = {};
+
+            for (const file of files) {
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    gameFiles[file.name] = new Uint8Array(arrayBuffer);
+                    
+                    const li = document.createElement('li');
+                    li.innerHTML = `✅ ${file.name} <span style="color: #888;">(${(file.size / 1024).toFixed(1)} KB)</span>`;
+                    uploadedFiles.appendChild(li);
+                } catch (error) {
+                    const li = document.createElement('li');
+                    li.innerHTML = `❌ ${file.name} - Error loading`;
+                    uploadedFiles.appendChild(li);
+                }
+            }
+
+            fileList.style.display = 'block';
+            
+            if (gameFiles['GAME.EXE'] || gameFiles['game.exe']) {
+                startBtn.disabled = false;
+                loading.innerHTML = '✅ Files ready! Click "Start Game" to play 688 Attack Sub';
+            } else {
+                loading.innerHTML = '⚠️ GAME.EXE not found. Make sure to upload the main executable file.';
+            }
+        }
+
+        async function startGame() {
+            if (Object.keys(gameFiles).length === 0) return;
+
+            loading.innerHTML = '🔄 Initializing DOS environment...';
+            startBtn.disabled = true;
+
+            try {
+                // Try multiple emulator approaches
+                await tryEmscriptenDOS();
+            } catch (error) {
+                console.error('Error:', error);
+                showFallbackMessage();
+            }
+        }
+
+        async function startGame() {
+            if (Object.keys(gameFiles).length === 0) return;
+
+            loading.innerHTML = '🔄 Initializing DOS environment...';
+            startBtn.disabled = true;
+
+            try {
+                // Try the most reliable method first - direct WASM DOSBox
+                await tryWASMDOSBox();
+            } catch (error) {
+                console.error('Error:', error);
+                showAlternativeOptions();
+            }
+        }
+
+        async function tryWASMDOSBox() {
+            loading.innerHTML = '🎮 Loading WASM DOSBox...';
+            
+            // Try loading DOSBox WASM directly
+            const wasmScript = document.createElement('script');
+            wasmScript.src = 'https://unpkg.com/dosbox-x-wasm@latest/dist/dosbox.js';
+            wasmScript.onload = initializeWASMDOSBox;
+            wasmScript.onerror = () => tryJSDOSBundle();
+            document.head.appendChild(wasmScript);
+        }
+
+        async function tryJSDOSBundle() {
+            loading.innerHTML = '🔄 Loading JS-DOS bundle...';
+            
+            // Try a different JS-DOS approach with bundled version
+            const script = document.createElement('script');
+            script.src = 'https://cdn.dos.zone/js-dos/6.22.59/current/js-dos.js';
+            script.onload = initializeJSDOSBundle;
+            script.onerror = () => createEmbeddedDOSBox();
+            document.head.appendChild(script);
+        }
+
+        function initializeWASMDOSBox() {
+            try {
+                const canvas = document.getElementById('dosbox');
+                canvas.style.display = 'block';
+                loading.innerHTML = '🎮 Starting WASM DOSBox...';
+                
+                if (typeof DosBoxX !== 'undefined') {
+                    const dosbox = new DosBoxX({
+                        canvas: canvas,
+                        memorySize: 16,
+                        onReady: function() {
+                            loading.innerHTML = '💾 Mounting game files...';
+                            
+                            // Create and mount filesystem
+                            for (const [filename, data] of Object.entries(gameFiles)) {
+                                dosbox.fs.writeFile('C:\\' + filename.toUpperCase(), data);
+                            }
+                            
+                            loading.innerHTML = '🚢 Starting 688 Attack Sub...';
+                            const exe = Object.keys(gameFiles).find(f => f.toLowerCase().endsWith('.exe'));
+                            if (exe) {
+                                dosbox.shell.exec('C:\\' + exe.toUpperCase());
+                                loading.style.display = 'none';
+                            }
+                        }
+                    });
+                } else {
+                    throw new Error('WASM DOSBox not loaded');
+                }
+            } catch (error) {
+                console.error('WASM DOSBox error:', error);
+                tryJSDOSBundle();
+            }
+        }
+
+        function initializeJSDOSBundle() {
+            try {
+                const canvas = document.getElementById('dosbox');
+                canvas.style.display = 'block';
+                loading.innerHTML = '🎮 Initializing JS-DOS...';
+                
+                if (typeof Dos !== 'undefined') {
+                    Dos(canvas).ready((fs, main) => {
+                        loading.innerHTML = '💾 Loading game files...';
+                        
+                        // Create files in DOS filesystem
+                        for (const [filename, data] of Object.entries(gameFiles)) {
+                            fs.createFile(filename.toUpperCase(), data);
+                        }
+                        
+                        loading.innerHTML = '🚢 Executing game...';
+                        
+                        // Find and run executable
+                        const exe = Object.keys(gameFiles).find(f => f.toLowerCase().endsWith('.exe'));
+                        if (exe) {
+                            main(['-c', exe.toUpperCase()]).then(() => {
+                                loading.style.display = 'none';
+                            });
+                        } else {
+                            // Try to run any executable file
+                            main(['-c', 'DIR']).then(() => {
+                                loading.innerHTML = '🎮 DOS ready - type commands to run your game';
+                            });
+                        }
+                    });
+                } else {
+                    throw new Error('JS-DOS not loaded');
+                }
+            } catch (error) {
+                console.error('JS-DOS error:', error);
+                createEmbeddedDOSBox();
+            }
+        }
+
+        async function createEmbeddedDOSBox() {
+            loading.innerHTML = '🔄 Creating embedded DOS environment...';
+            
+            // Create a more functional embedded DOS emulator
+            const canvas = document.getElementById('dosbox');
+            canvas.style.display = 'block';
+            canvas.width = 800;
+            canvas.height = 600;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // More sophisticated DOS simulation
+            let currentPath = 'C:\\';
+            let commandHistory = [];
+            let currentCommand = '';
+            let cursorX = 0;
+            let cursorY = 0;
+            
+            function renderDOSScreen() {
+                // Clear screen
+                ctx.fillStyle = '#000080';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // DOS header
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '16px monospace';
+                ctx.fillText('MS-DOS 6.22 Web Emulator', 10, 30);
+                ctx.fillText('688 Attack Sub - Game Files Loaded', 10, 50);
+                ctx.fillText('=' .repeat(50), 10, 70);
+                
+                // File listing
+                ctx.fillStyle = '#00ffff';
+                ctx.fillText('Directory of ' + currentPath, 10, 100);
+                
+                let y = 130;
+                Object.keys(gameFiles).forEach(filename => {
+                    const size = gameFiles[filename].length;
+                    const sizeStr = size.toString().padStart(10);
+                    ctx.fillText(`${filename.padEnd(20)} ${sizeStr} bytes`, 10, y);
+                    y += 20;
+                });
+                
+                // Command prompt
+                y += 20;
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(currentPath + '>', 10, y);
+                ctx.fillText(currentCommand, 10 + currentPath.length * 10 + 20, y);
+                
+                // Instructions
+                y += 40;
+                ctx.fillStyle = '#ffff00';
+                ctx.fillText('Instructions:', 10, y);
+                y += 25;
+                ctx.fillText('• Type "GAME" or "GAME.EXE" to run 688 Attack Sub', 10, y);
+                y += 20;
+                ctx.fillText('• Type "DIR" to list files', 10, y);
+                y += 20;
+                ctx.fillText('• Type "HELP" for more commands', 10, y);
+                y += 30;
+                ctx.fillStyle = '#ff6666';
+                ctx.fillText('Note: This is a simulation. For full gameplay, use DOSBox.', 10, y);
+            }
+            
+            function processCommand(cmd) {
+                cmd = cmd.toUpperCase().trim();
+                
+                if (cmd === 'DIR') {
+                    renderDOSScreen();
+                } else if (cmd === 'GAME' || cmd === 'GAME.EXE') {
+                    // Simulate game launch
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#00ff00';
+                    ctx.font = '20px monospace';
+                    ctx.fillText('🚢 688 ATTACK SUB', canvas.width/2 - 100, canvas.height/2 - 60);
+                    ctx.fillText('================', canvas.width/2 - 100, canvas.height/2 - 30);
+                    ctx.fillText('Game Simulation', canvas.width/2 - 100, canvas.height/2);
+                    ctx.fillText('Files Loaded Successfully!', canvas.width/2 - 150, canvas.height/2 + 40);
+                    ctx.fillStyle = '#ffff00';
+                    ctx.font = '14px monospace';
+                    ctx.fillText('For full game experience, use DOSBox on your computer', canvas.width/2 - 250, canvas.height/2 + 80);
+                    loading.innerHTML = '🎮 Game simulation running!';
+                } else if (cmd === 'HELP') {
+                    renderDOSScreen();
+                } else {
+                    renderDOSScreen();
+                }
+                
+                currentCommand = '';
+            }
+            
+            // Keyboard handling
+            canvas.tabIndex = 0;
+            canvas.focus();
+            canvas.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    processCommand(currentCommand);
+                } else if (e.key === 'Backspace') {
+                    currentCommand = currentCommand.slice(0, -1);
+                    renderDOSScreen();
+                } else if (e.key.length === 1) {
+                    currentCommand += e.key.toUpperCase();
+                    renderDOSScreen();
+                }
+                e.preventDefault();
+            });
+            
+            renderDOSScreen();
+            loading.innerHTML = '🖥️ Interactive DOS ready! Click the screen and type commands.';
+        }
+
+        function tryBasicEmulator() {
+            loading.innerHTML = '🎮 Starting basic emulator...';
+            
+            const canvas = document.getElementById('dosbox');
+            canvas.style.display = 'block';
+            
+            // Create a basic mock DOS environment for demonstration
+            const ctx = canvas.getContext('2d');
+            canvas.width = 800;
+            canvas.height = 600;
+            
+            // DOS-like black screen
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // DOS-style text
+            ctx.fillStyle = '#00ff00';
+            ctx.font = '16px monospace';
+            
+            let y = 50;
+            const lines = [
+                'MS-DOS 6.22 Emulator',
+                '',
+                'C:\\>dir',
+                'Directory of C:\\',
+                '',
+                ...Object.keys(gameFiles).map(name => `${name.padEnd(20)} ${Math.floor(gameFiles[name].length / 1024)} KB`),
+                '',
+                'C:\\>game.exe',
+                '',
+                '🚢 688 Attack Sub - Loading...',
+                '',
+                '⚠️  This is a basic emulator demonstration.',
+                '   For full gameplay, use DOSBox on your computer.',
+                '',
+                '   Files have been successfully loaded:',
+                `   Total files: ${Object.keys(gameFiles).length}`,
+                `   Total size: ${Math.floor(Object.values(gameFiles).reduce((a,b) => a + b.length, 0) / 1024)} KB`,
+                '',
+                '   Press F1 for help, ESC to exit'
+            ];
+            
+            lines.forEach(line => {
+                ctx.fillText(line, 20, y);
+                y += 20;
+            });
+            
+            // Simulate cursor
+            let cursorVisible = true;
+            setInterval(() => {
+                ctx.fillStyle = cursorVisible ? '#000000' : '#00ff00';
+                ctx.fillRect(20, y, 10, 16);
+                cursorVisible = !cursorVisible;
+            }, 500);
+            
+            loading.innerHTML = '✅ Emulator ready! This is a demo - use DOSBox for full game experience.';
+            
+            // Add basic keyboard handling
+            canvas.tabIndex = 0;
+            canvas.focus();
+            canvas.addEventListener('keydown', handleKeypress);
+        }
+
+        function showAlternativeOptions() {
+            loading.innerHTML = `
+                <div style="text-align: left; color: #ffaa00;">
+                    ⚠️ <strong>Web DOS Emulation Limitations</strong><br><br>
+                    
+                    <strong>Why web emulators often fail:</strong><br>
+                    • CORS (Cross-Origin) security policies<br>
+                    • CDN availability issues<br>
+                    • Browser compatibility problems<br>
+                    • Complex DOS game requirements<br><br>
+                    
+                    <strong>💡 Recommended Solutions:</strong><br><br>
+                    
+                    <strong>Option 1 - DOSBox (Best):</strong><br>
+                    • Download DOSBox from dosbox.com<br>
+                    • 100% game compatibility<br>
+                    • Better performance<br>
+                    • Full feature support<br><br>
+                    
+                    <strong>Option 2 - Archive.org:</strong><br>
+                    • Visit archive.org/details/softwarelibrary_msdos_games<br>
+                    • Many DOS games playable online<br>
+                    • Pre-configured and working<br><br>
+                    
+                    <strong>Option 3 - RetroArch Web:</strong><br>
+                    • Use retroarch.com web player<br>
+                    • Load DOS core<br>
+                    • Upload your game files<br><br>
+                    
+                    Your files are ready - just need a compatible emulator!
+                </div>
+            `;
+        }
+
+        function handleKeypress(event) {
+            const canvas = document.getElementById('dosbox');
+            const ctx = canvas.getContext('2d');
+            
+            if (event.key === 'F1') {
+                // Show help
+                ctx.fillStyle = '#000080';
+                ctx.fillRect(100, 100, 600, 400);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '14px monospace';
+                
+                const helpText = [
+                    '688 Attack Sub - Help',
+                    '',
+                    'This is a demonstration emulator.',
+                    'Your game files have been loaded successfully.',
+                    '',
+                    'For the full 688 Attack Sub experience:',
+                    '1. Download DOSBox from dosbox.com',
+                    '2. Copy your game files to a folder',
+                    '3. Run the game in DOSBox',
+                    '',
+                    'Press any key to continue...'
+                ];
+                
+                helpText.forEach((line, i) => {
+                    ctx.fillText(line, 120, 130 + i * 18);
+                });
+            } else if (event.key === 'Escape') {
+                restartPage();
+            }
+        }
+
+        function showFallbackMessage() {
+            loading.innerHTML = `
+                <div style="color: #ff6b6b;">
+                    ❌ Web emulator failed to load<br><br>
+                    <strong>Alternative options:</strong><br>
+                    • Use DOSBox on your computer (more reliable)<br>
+                    • Try a different browser<br>
+                    • Check if files are corrupted<br><br>
+                    Click "Download DOSBox Setup" for local installation guide
+                </div>
+            `;
+            startBtn.disabled = false;
+        }
+
+        function downloadForDOSBox() {
+            const instructions = `
+HOW TO RUN 688 ATTACK SUB WITH DOSBOX:
+
+1. Download DOSBox from: https://www.dosbox.com/
+
+2. Install DOSBox on your computer
+
+3. Create a folder like C:\\GAMES\\688SUB\\ and copy your game files there
+
+4. Open DOSBox and type these commands:
+   mount c c:\\games
+   c:
+   cd 688sub
+   game.exe
+
+5. Your game should start!
+
+DOSBox is more compatible and reliable than web emulators.
+`;
+            
+            const blob = new Blob([instructions], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '688_Attack_Sub_DOSBox_Instructions.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function restartPage() {
+            location.reload();
+        }
+    </script>
 </body>
 </html>
